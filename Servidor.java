@@ -82,29 +82,48 @@ public class Servidor {
             try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    String[] dados = line.split(",");
-                    if (dados.length == 2 && dados[0].equals(usuario) && dados[1].equals(senha)) {
-                        return true;
+                    String[] dados = line.trim().split(",");
+                    if (dados.length == 2) {
+                        String usuarioArquivo = dados[0].trim();
+                        String senhaArquivo = dados[1].trim();
+                        if (usuarioArquivo.equals(usuario) && senhaArquivo.equals(senha)) {
+                            return true; // Login correto
+                        }
                     }
                 }
             }
-            return false;
+            return false; // Login inválido
         }
 
         private boolean cadastrarUsuario(String usuario, String senha) throws IOException {
-            File file = new File(USUARIOS_FILE);
-            if (!file.exists()) file.createNewFile();
+                File file = new File(USUARIOS_FILE);
+                if (!file.exists()) {
+                    file.createNewFile();
+                }
 
-            if (verificarLogin(usuario, senha)) return false;
+                // Verifica se o usuário já está cadastrado
+                try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        String[] dados = line.trim().split(",");
+                        if (dados.length == 2 && dados[0].equals(usuario)) {
+                            return false; // Usuário já existe
+                        }
+                    }
+                }
 
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
-                writer.write(usuario + "," + senha);
-                writer.newLine();
+                // Adiciona o novo usuário ao arquivo
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
+                    writer.write(usuario + "," + senha);
+                    writer.newLine();
+                    writer.flush(); // Garante que os dados sejam gravados no arquivo
+                }
+                return true;
             }
-            return true;
+
         }
 
-        private void prepararDiretorios(String usuario) throws IOException {
+        private static void prepararDiretorios(String usuario) throws IOException {
             Path userPath = Paths.get(STORAGE_DIR, usuario);
             if (!Files.exists(userPath)) {
                 Files.createDirectories(userPath);
@@ -114,7 +133,7 @@ public class Servidor {
             }
         }
 
-        private void receberArquivo(ObjectInputStream entrada, ObjectOutputStream saida, String usuario) throws IOException, ClassNotFoundException {
+        private static void receberArquivo(ObjectInputStream entrada, ObjectOutputStream saida, String usuario) throws IOException, ClassNotFoundException {
             String subPasta = (String) entrada.readObject();
             String nomeArquivo = (String) entrada.readObject();
             String extensao = nomeArquivo.substring(nomeArquivo.lastIndexOf('.') + 1).toLowerCase();
@@ -142,7 +161,7 @@ public class Servidor {
             System.out.println("Arquivo salvo: " + caminhoArquivo);
         }
 
-        private void enviarArquivo(ObjectOutputStream saida, ObjectInputStream entrada, String usuario) throws IOException, ClassNotFoundException {
+        private static void enviarArquivo(ObjectOutputStream saida, ObjectInputStream entrada, String usuario) throws IOException, ClassNotFoundException {
             String subPasta = (String) entrada.readObject();
             String nomeArquivo = (String) entrada.readObject();
             String caminhoArquivo = STORAGE_DIR + usuario + "/" + subPasta + "/" + nomeArquivo;
@@ -163,7 +182,7 @@ public class Servidor {
             }
         }
 
-        private void logAtividade(String usuario, String operacao, String arquivo) {
+        private static void logAtividade(String usuario, String operacao, String arquivo) {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(LOG_FILE, true))) {
                 writer.write(usuario + " - " + operacao + " - " + arquivo + " - " + new Date());
                 writer.newLine();
@@ -172,4 +191,4 @@ public class Servidor {
             }
         }
     }
-}
+
