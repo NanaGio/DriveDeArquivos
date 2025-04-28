@@ -112,7 +112,6 @@ public class Servidor {
                     }
                 }
 
-                // adicionar novo usuario
                 try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
                     writer.write(usuario + "," + senha);
                     writer.newLine();
