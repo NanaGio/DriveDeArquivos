@@ -40,7 +40,7 @@ public class Servidor {
                 while (true) {
                     String opcao = (String) entrada.readObject();
 
-                    if (opcao.equals("1")) { // LOGIN
+                    if (opcao.equals("1")) { // login
                         String usuario = (String) entrada.readObject();
                         String senha = (String) entrada.readObject();
 
@@ -51,7 +51,7 @@ public class Servidor {
                         } else {
                             saida.writeObject("Login inválido!");
                         }
-                    } else if (opcao.equals("2")) { // CADASTRO
+                    } else if (opcao.equals("2")) { // cadastro
                         String usuario = (String) entrada.readObject();
                         String senha = (String) entrada.readObject();
 
@@ -60,13 +60,13 @@ public class Servidor {
                         } else {
                             saida.writeObject("Usuário já existe!");
                         }
-                    } else if (opcao.equals("3")) { // SAIR
+                    } else if (opcao.equals("3")) { // sair
                         break;
                     } else if (usuarioLogado == null) {
                         saida.writeObject("Erro: Você precisa fazer login primeiro!");
-                    } else if (opcao.equals("4")) { // ENVIAR ARQUIVO
+                    } else if (opcao.equals("4")) { // enviar o arquvio
                         receberArquivo(entrada, saida, usuarioLogado);
-                    } else if (opcao.equals("5")) { // FAZER DOWNLOAD
+                    } else if (opcao.equals("5")) { // fazer o download
                         enviarArquivo(saida, entrada, usuarioLogado);
                     }
                 }
@@ -87,12 +87,12 @@ public class Servidor {
                         String usuarioArquivo = dados[0].trim();
                         String senhaArquivo = dados[1].trim();
                         if (usuarioArquivo.equals(usuario) && senhaArquivo.equals(senha)) {
-                            return true; // Login correto
+                            return true;
                         }
                     }
                 }
             }
-            return false; // Login inválido
+            return false;
         }
 
         private boolean cadastrarUsuario(String usuario, String senha) throws IOException {
@@ -101,22 +101,22 @@ public class Servidor {
                     file.createNewFile();
                 }
 
-                // Verifica se o usuário já está cadastrado
+
                 try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
                     String line;
                     while ((line = reader.readLine()) != null) {
                         String[] dados = line.trim().split(",");
                         if (dados.length == 2 && dados[0].equals(usuario)) {
-                            return false; // Usuário já existe
+                            return false;
                         }
                     }
                 }
 
-                // Adiciona o novo usuário ao arquivo
+                // adicionar novo usuario
                 try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
                     writer.write(usuario + "," + senha);
                     writer.newLine();
-                    writer.flush(); // Garante que os dados sejam gravados no arquivo
+                    writer.flush();
                 }
                 return true;
             }
